@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Preview</title>
+    <!--
+      Full-screen demo runner for https://pejiai.com/demo/.
+      It lives on its own origin (ghosmali22-prog.github.io), separate from pejiai.com, so a demo
+      can use the camera (browsers refuse the camera to opaque "null" origins) while still having
+      no access to pejiai.com's cookies, storage, admin session or DOM.
+      It only runs when framed by pejiai.com, accepts exactly one document, and only from that parent.
+    -->
+    <script>
+      ;(function () {
+        var ALLOWED = ['https://pejiai.com', 'https://www.pejiai.com', 'http://localhost:5173', 'http://localhost:4173']
+        var anc = location.ancestorOrigins
+        var top = anc && anc.length ? anc[anc.length - 1] : document.referrer ? new URL(document.referrer).origin : ''
+        if (parent === window || ALLOWED.indexOf(top) < 0) return
+        addEventListener('message', function onMessage(e) {
+          if (e.source !== parent || ALLOWED.indexOf(e.origin) < 0) return
+          if (!e.data || e.data.type !== 'pj-render' || typeof e.data.html !== 'string') return
+          removeEventListener('message', onMessage)
+          document.open()
+          document.write(e.data.html)
+          document.close()
+        })
+        parent.postMessage({ type: 'pj-sandbox-ready' }, top)
+      })()
+    </script>
+  </head>
+  <body style="margin: 0; background: #fff"></body>
+</html>
